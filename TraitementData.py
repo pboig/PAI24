@@ -10,6 +10,8 @@ Created on Fri Dec  8 16:39:59 2017
                                         LECTURE DES FICHIERS
 ===========================================================================================================
 """
+import numpy as np
+
 def cint(txt):      # Convertit une donnée texte d'un fichier INSEE en un entier
     if (txt == 'Z') or (txt == 'ZZ') or (txt == 'ZZZ') or (txt == 'ZZZZ'):  # A étudier (fichier MobPro)
         return(0)
@@ -18,7 +20,7 @@ def cint(txt):      # Convertit une donnée texte d'un fichier INSEE en un entie
 
 def readfile(nomFichier):
     with open(nomFichier, 'r') as f:
-        data = f.readlines() #ou f.read().splitlines()
+        data = f.readlines() 
     return(data)
 
 def add_ligne(txtLigne, indicesExtract, nbIdComm, J, iDep, res):
@@ -71,13 +73,78 @@ def loadData(txtNomFichier, iData, iDep = None):
     txtDataBrut = readfile(txtNomFichier)
     return(extractUsefulData(txtDataBrut, iData, iDep))
 
+"""
+===========================================================================================================
+                                        TRAITEMENT DES FICHIERS
+===========================================================================================================
+"""
 def normalisationModalites(mData):
+    nbModalites = [5, 2]   # nombre de modalités de chaque variable
     for ligne in mData:
-        if ligne[2] not in [3,4,5,6]:   # CSP = Autre, Cadre, Pro. intermédiaire, Employé, Ouvrier
+        # CSP = 0 Autre; 1 Cadre; 2 Pro. intermédiaire; 3 Employé; 4 Ouvrier
+        if ligne[2] not in [3,4,5,6]:   
             ligne[2] = 2
-        ligne[2] -= 2   #Indice commençant à 0
-        if ligne[3] != 1:               # Lieu de travail = 1 si travaille dans la commune de résidence et 0 sinon
+        ligne[2] -= 2   
+        
+        # Lieu de travail = 0 Hors commune résidence; 1 commune résidence
+        if ligne[3] != 1:
             ligne[3] = 0
-    return()
+    return(nbModalites)
 
+def regroupeParCommune(mData, vNbModalites):
+    N = len(mData)
+    J = len(vNbModalites)
+    i = 0
+    res = []
+    while i < N:
+        newCommune = [[0 for kj in range(j)] for j in vNbModalites]
+        newCommune.insert(0, mData[i][1])
+        nHabitantCommune = 0               
+        while i < N and mData[i][1] == newCommune[0]:
+            for j in range(1,J+1):
+                newCommune[j][mData[i][j+1]] += 1            
+            i += 1
+            nHabitantCommune += 1
+        for j in range(1,J+1):
+            for kj in range(vNbModalites[j-1]):
+                newCommune[j][kj] /= nHabitantCommune
+        res.append(newCommune)
+    return(res)
+    
+def concatenationDonnees(mData1, mData2):
+    N1, N2 = len(mData1), len(mData2)
+    notFound, idNF = [], []
+    for i1 in range(N1):
+        i2 = 0
+        while i2 < N2 and int(mData1[i1][0]) != int(mData2[i2][0]):
+            i2 += 1
+        if i2 == N2:
+            notFound.append(mData1[i1][0])
+            idNF.append(i1)
+        else:
+            mData1[i1].insert(1, mData2[i2][1])
+    if len(idNF) != 0:
+        for i in range(len(idNF)):
+            del(mData1[idNF[i]-i])
+    del(mData2)
+    return(notFound)    
+
+def splitSet(y):
+    N = y.shape[0]  
+    sets = np.random.binomial(1,0.8,N)
+    uniq, count = np.unique(sets, return_counts=True)
+    trainingSet = np.zeros(count[1], dtype = 'int')
+    validationSet = np.zeros(count[0], dtype = 'int')
+    p, q = 0, 0
+    for i in range(N):
+        if sets[i]:
+            trainingSet[p] = i
+            p += 1
+        else:
+            validationSet[q] = i
+            q += 1
+    return(trainingSet, validationSet)
+            
+    
+    
     
