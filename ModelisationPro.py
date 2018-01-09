@@ -77,7 +77,19 @@ def hypFunction(mDataX, Theta, degPoly):
     return(X.dot(Theta.T))
 
 def error(hypFunction, Theta, dataX, dataY, degPoly):
-    return( np.mean( (hypFunction(dataX, Theta, degPoly)-dataY)**2, axis = 0) )
+    n = dataX.shape[0]
+    w = np.zeros(n)                                     # Poids des individus, pondérés par le nombre d'habitants/commune X[i,0]
+    for i in range(n):
+        w[i] = dataX[i,0]
+    weight = np.diag(w/np.sum(w))                       # Poids sous forme matricielle
+    guess = hypFunction(dataX, Theta, degPoly)
+    residu = (guess-dataY)/(1E-10+guess+dataY/2)        
+    square_Erreur = residu.T.dot(weight.dot(residu))    # Moyenne pondérée des carrés des résidus
+    k = square_Erreur.shape[0]      
+    erreur = np.zeros(k)                                # Eléments diagonaux de la matrice square_Erreur
+    for i in range(k):
+        erreur[i] = square_Erreur[i,i]   
+    return(np.sqrt(erreur))
 
 def costFunction(Theta, X, y, Lambda):
     m = y.shape[0]
