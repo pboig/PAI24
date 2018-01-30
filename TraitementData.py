@@ -127,8 +127,44 @@ def concatenationDonnees(mData1, mData2):
         for i in range(len(idNF)):
             del(mData1[idNF[i]-i])
     del(mData2)
-    return(notFound)    
+    return(notFound)
+    
+def concatenationDonneesWNumpy(mData, mDataN):
+    N1, N2 = len(mData), mDataN.shape[0]
+    notFound, idNF = [], []
+    for i1 in range(N1):
+        i2 = 0
+        while i2 < N2 and int(mData[i1][0]) != int(mDataN[i2,0]):
+            i2 += 1
+        if i2 == N2:
+            notFound.append(mData[i1][0])
+            idNF.append(i1)
+        else:
+            mData[i1].insert(1, list(mDataN[i2,1:]))
+    if len(idNF) != 0:
+        for i in range(len(idNF)):
+            del(mData[idNF[i]-i])
+    return(notFound)
 
+def delNotFoundCommNumpy(mData,mDataN):         # Suppression des communes de la matrice numpy mDataN non trouvées dans mData
+    N1, N2 = len(mData), mDataN.shape[0]
+    notFound = []
+    for i2 in range(N2):
+        i1 = 0
+        while i1 < N1 and int(mData[i1][0]) != int(mDataN[i2,0]):
+            i1 += 1
+        if i1 == N1:
+            notFound.append(mDataN[i2,0])
+    p = N2-len(notFound); q = mDataN.shape[1]
+    if p < N2:
+        newDataN = np.zeros((p,q))
+        j = 0
+        for i in range(N2):
+            if not(mDataN[i,0] in notFound):
+                newDataN[j,:] = mDataN[i,:]
+                j += 1
+    return(newDataN)              
+                            
 def splitSet(y):
     N = y.shape[0]  
     sets = np.random.binomial(1,0.8,N)
@@ -145,6 +181,12 @@ def splitSet(y):
             q += 1
     return(trainingSet, validationSet)
             
+def checkComm(mDataComm):
+    res = []
+    for i in range(len(mDataComm)):
+        res.append(mDataComm[i][0])
+    return(res)
+    
     
     
     

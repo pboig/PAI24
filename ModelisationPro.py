@@ -8,12 +8,12 @@ Created on Thu Dec 21 10:03:55 2017
 """
 Méthodologie :
 1) PRE-TRAITEMENT :  Conversion matrice données en une matrice numpy
-                        > dataToNumpy (Entrée = whole Data Set)
+                        > 'dataToNumpy' (Entrée = whole Data Set)
 2) OPTIMISATION   :  Regression non-linéaire avec la matrice numpy 
-                        > fonction2 (Entrée = Training Set)
-                            > hypFonction (Entrée = une commune - numpy)
+                        > 'optimisation' (Entrée = Training Set)
+                            > 'hypFunction' (Entrée = une commune - numpy)
 3) CALCUL RESULTAT:  Calcul des résultats à partir des paramètres optimisés - en passant par numpy 
-                        > hypothesisFonction (Entrée = une commune)
+                        > hypFunction (Entrée = une ou des commune(s))
 4) POST-TRAITEMENT:  Validation de la fonction hypothèse 
                         > fonction4 (Entrée = Validation Set)
                         
@@ -69,8 +69,8 @@ def dataToNumpy(mData, iOut = []):
 """ =================================== OPTIMISATION =================================== """
 def sigmoid(X):
     return(1./(1+np.exp(-X)))
-
-def hypFunction(mDataX, Theta, degPoly):
+    
+def hypFunction(mDataX, Theta, degPoly):                # Ne marche actuellement pas si mDataX contient une seule commune
     X = np.concatenate((np.ones((mDataX.shape[0],1)), mDataX), axis = 1)
     for i in range(2, degPoly+1):
         X = np.concatenate((X, mDataX**i), axis = 1)
@@ -127,9 +127,10 @@ def optimisation(mDataX, mDataY, degPoly, Lambda = 1.):
     
     
     
+"""    
+from scipy.cluster.vq import kmeans2
+centroids, clust_ind = kmeans2(mFact[:,:2], nb_classes)
     
-            
-    
-    
+"""    
     
     
