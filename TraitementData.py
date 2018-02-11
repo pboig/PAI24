@@ -171,24 +171,48 @@ def regroupeParCommune(mData, vNbModalites):
         res.append(newCommune)                                          # On renvoit une liste comportant les pourcentage de chaque modalité dans une commune donnée pour toute les communes
     return(res)
     
+   
+"""La fonction  concatenationDonnees prend deux tableaux mData1 et mData2 et ajoute les données d'une commune de mData2 dans la commune correspondante de mData1. 
+En pratique, on concatène les pourcentage de modalités de chaque communes (mData1 issu de regroupeParCommune) et le nombre d'emplois par communes (mData2 issu de loadXlsEmploi).
+Pour chaque commune de mData1, on parcourt toutes les communes de mData2 et on ajoute alors le nombre d'emplois de la commune comme nouveau champ d'indice 1 de la ligne i de mData1.
+A la fin de l'execution de la fonction, mData1 est de la forme : [ indice de la commune, nombre d'emplois, [%CSP = 0, %CSP = 1, %CSP = 2, %CSP = 3, %CSP = 4], [%indiceLieuTravail = 0, %indiceLieuTravail = 1] ]
+Par ailleurs, on stocke toutes les communes de mData1 dont on n'a pas de données sur le nombre d'emplois dans une variable notFound que l'on renvoit à la fin."""
+
+# mData1 : tableau issu de la fonction loadData pour un iData donné et un iDep donné. Dans notre utilisation mData1 représente le résultat de la fonction regroupeParCommune. Il comporte donc une liste de nom de commune et de pourcentage de chaque modalités dans la commune.
+        # une ligne de mData1 a la forme [ indice de la commune, [%CSP = 0, %CSP = 1, %CSP = 2, %CSP = 3, %CSP = 4], [%indiceLieuTravail = 0, %indiceLieuTravail = 1] ]
+# mData2 : tableau issu de la fonction loadData pour un iData donné et un iDep donné. Dans notre utilisation mData2 représente le résultat de la fonction loadXlsEmplois. Il comporte donc une liste avec pour chaque commune le nombre d'emplois dans cette commune.
+        # une ligne de mData2 a la forme [ ID_commune ; nb_emplois ]
+
 def concatenationDonnees(mData1, mData2):
-    N1, N2 = len(mData1), len(mData2)
-    notFound, idNF = [], []
-    for i1 in range(N1):
+    N1, N2 = len(mData1), len(mData2)                                   # N1 : nombre de communes dans mData1   ;    N2 : nombre de communes dans mData2
+    notFound, idNF = [], []                                             # On repère les indices des communes non trouvées dans mData 2
+    for i1 in range(N1):                                                # On parcourt toutes les communes de mData1
         i2 = 0
-        while i2 < N2 and int(mData1[i1][0]) != int(mData2[i2][0]):
+        while i2 < N2 and int(mData1[i1][0]) != int(mData2[i2][0]):     # On parcourt toutes les communes de mData2 et on cherche celle correspondant à la commune de la ligne i1 de mData1
             i2 += 1
-        if i2 == N2:
+        if i2 == N2:                                                    # Si mData2 ne comprend pas la commune de la ligne i1 de mData1 on la stoche dans notFound ainsi que son indice dans idNF
             notFound.append(mData1[i1][0])
             idNF.append(i1)
-        else:
-            mData1[i1].insert(1, mData2[i2][1])
+        else:                                                           # Le cas où la commune de la ligne i1 de mData1 est la même que celle de la ligne i2 de mData2
+            mData1[i1].insert(1, mData2[i2][1])                         # On ajoute un nouveau champ à mData égal au nombre d'emplois dans la commune
     if len(idNF) != 0:
-        for i in range(len(idNF)):
+        for i in range(len(idNF)):                                      # On supprime toutes les communes de mData1 dans lesquelles on a pas le nombre d'emplois
             del(mData1[idNF[i]-i])
     del(mData2)
-    return(notFound)
+    return(notFound)                                                    # On renvoit les communes de mData1 dont on ne dispose pas du nombre d'emplois
     
+    
+    
+    
+"""La fonction ConcatenationDonneesWNumpy réalise la même opération que la fonction concatenationDonnees en prenant compte du format de données de mDataN.
+Ainsi, pour chaque commune de mData on ajoute les données GPS de la commune GPS de mDataN en indice 1 de mData ou alors on la stocke dans notFound si on ne dispose pas de données GPS. En renvoit alors les communes dont on ne connait pas de données GPS
+A la fin de l'execution, mData a la forme :  [ indice de la commune,[ X (km), Y (km) ],  nombre d'emplois, [%CSP = 0, %CSP = 1, %CSP = 2, %CSP = 3, %CSP = 4], [%indiceLieuTravail = 0, %indiceLieuTravail = 1] ]"""
+
+# mData : tableau issu de la fonction loadData pour un iData donné et un iDep donné. Dans notre utilisation mData1 représente le résultat de la fonction regroupeParCommune après exécution de concatenationDonnees. Il comporte donc une liste de nom de commune et de pourcentage de chaque modalités dans la commune ainsi que le nombre d'emplois dans la commune.
+        # une ligne de mData a la forme [ indice de la commune, nombre d'emplois, [%CSP = 0, %CSP = 1, %CSP = 2, %CSP = 3, %CSP = 4], [%indiceLieuTravail = 0, %indiceLieuTravail = 1] ]
+# mDataN : tableau au format Numpy soit une matrice. Dans notre utilisation, mDataN représente la matrice issue de la fonction loadDataGPS. Elle comporte donc le numéro de la commune et ses données GPS
+        # un champ de la matrice a la forme [ ID_commune ; distance_X(km) ; distance_Y(km) ]
+
 def concatenationDonneesWNumpy(mData, mDataN):
     N1, N2 = len(mData), mDataN.shape[0]
     notFound, idNF = [], []
@@ -206,41 +230,67 @@ def concatenationDonneesWNumpy(mData, mDataN):
             del(mData[idNF[i]-i])
     return(notFound)
 
+
+
+
+"""La fonction delNotFoundCommNumpy a pour but de supprimer toutes les données des communes de mDataN qui ne sont pas dans mData
+On comence par lister toutes les communes qui ne sont dans mDataN et pas dans mDataN. On crée ensuite une nouvelle matrice qui comporte autant de champs qu'il y a de communes communes à mData et mDataN
+On parcourt ensuite toute la matrice mDatan et on remplit la nouvelle matrice ainsi créée. On renvoit au final cette nouvelle matrice complétée des communes et de leurs données GPS"""
+
+# mData : tableau issu de la fonction loadData pour un iData donné et un iDep donné. Dans notre utilisation mData1 représente le résultat de la fonction regroupeParCommune après exécution de concatenationDonnees et de concatenationDonneesWNumpy. 
+# Il comporte donc une liste de nom de commune et de pourcentage de chaque modalités dans la commune ainsi que le nombre d'emplois dans la commune et les données GPS de la commune.
+        # une ligne de mData a la forme  [ indice de la commune,[ X (km), Y (km) ],  nombre d'emplois, [%CSP = 0, %CSP = 1, %CSP = 2, %CSP = 3, %CSP = 4], [%indiceLieuTravail = 0, %indiceLieuTravail = 1] ]
+# mDataN : tableau au format Numpy soit une matrice. Dans notre utilisation, mDataN représente la matrice issue de la fonction loadDataGPS. Elle comporte donc le numéro de la commune et ses données GPS
+        # un champ de la matrice a la forme [ ID_commune ; distance_X(km) ; distance_Y(km) ]
+
 def delNotFoundCommNumpy(mData,mDataN):         # Suppression des communes de la matrice numpy mDataN non trouvées dans mData
-    N1, N2 = len(mData), mDataN.shape[0]
+    N1, N2 = len(mData), mDataN.shape[0]                            # N1 : nombre de communes dans mData   ;    N2 : nombre de communes dans mDataN 
     notFound = []
-    for i2 in range(N2):
+    for i2 in range(N2):                                            # On parcourt toutes les communes de mDataN
         i1 = 0
-        while i1 < N1 and int(mData[i1][0]) != int(mDataN[i2,0]):
+        while i1 < N1 and int(mData[i1][0]) != int(mDataN[i2,0]):   # On parcourt toutes les communes de mData
             i1 += 1
-        if i1 == N1:
-            notFound.append(mDataN[i2,0])
-    p = N2-len(notFound); q = mDataN.shape[1]
+        if i1 == N1:                                                # Si la communes d'indice i2 de mDataN n'est pas dans mData1
+            notFound.append(mDataN[i2,0])                           # On stocke les donnes GPS de la commune d'indice i2 et son numéro dans notFound
+    p = N2-len(notFound); q = mDataN.shape[1]                       # p : nombre de communes communes à mData et mDataN    ;    q : nombre de champ de chaque composante de la matrice. ie : Idcommune, x , Y
     if p < N2:
-        newDataN = np.zeros((p,q))
+        newDataN = np.zeros((p,q))                                  # On crée une nouvelle matrice avec autant de composantes qu'il y a de communes communes à mData et mDataN
         j = 0
-        for i in range(N2):
-            if not(mDataN[i,0] in notFound):
-                newDataN[j,:] = mDataN[i,:]
+        for i in range(N2):                                         # On parcourt toutes les communes de mDataN pour compléter newDataN avec celles qui sont communes à mData et mDataN
+            if not(mDataN[i,0] in notFound):                        # On s'assure que la commune d'indice i est bien dans les deux fichiers
+                newDataN[j,:] = mDataN[i,:]                         # On complète newDataN
                 j += 1
-    return(newDataN)              
-                            
+    return(newDataN)                                                # On renvoit une matrice ne comportant que les communes et leurs données GPS qui sont dans mData.
+
+
+
+"""La fontion splitSet sépare les valeurs de y dans les matrices trainingSet et validationSet avec une probabilité de 0.8 pour trainingSet.
+Ainsi, pour chaque champ de y, on a une chance de 0.8 de le stocker dans trainingSet. on ne stock toutefois que les indices des champs de y dans les deux nouvelles matrices créées.
+On renvoit ainsi les matrices trainingSet et validationSet."""
+
+# y : matrice contenant des données issues de regroupeParCommune converties au format numpy pour les opérations de modélisation et d'optimisation.
+                     
 def splitSet(y):
-    N = y.shape[0]  
-    sets = np.random.binomial(1,0.8,N)
-    uniq, count = np.unique(sets, return_counts=True)
-    trainingSet = np.zeros(count[1], dtype = 'int')
-    validationSet = np.zeros(count[0], dtype = 'int')
+    N = y.shape[0]                                                  # N : taille de la matrice y
+    sets = np.random.binomial(1,0.8,N)                              # On renvoit une matrice contenant N essais d'une variable binomiale de probabilité 0.8 (constitué de 0 et de 1)
+    uniq, count = np.unique(sets, return_counts=True)               # uniq : renvoit une matrice contenant tous les nombres de sets qui sont uniques dans l'odre croissant     ;     count : renvoit une matrice contenant le nombre d'apparition de chaque nombre de uniq dans sets et le type des variables
+    trainingSet = np.zeros(count[1], dtype = 'int')                 # On crée une matrice aussi grande qu'il y a de fois 1 dans sets
+    validationSet = np.zeros(count[0], dtype = 'int')               # On crée une matrice aussi grande qu'il y a de fois 0 dans sets       
     p, q = 0, 0
-    for i in range(N):
-        if sets[i]:
-            trainingSet[p] = i
+    for i in range(N):                                              # On parcourt tous les essais de la variable sets
+        if sets[i]:                                                 # Si sets[i] = 1                   
+            trainingSet[p] = i                                      # On ajoute l'indice i à trainingSet
             p += 1
-        else:
-            validationSet[q] = i
+        else:                                                       # Si stes[i] = 0
+            validationSet[q] = i                                    # On ajoute l'indice i à validationSet
             q += 1
     return(trainingSet, validationSet)
-            
+        
+
+
+
+""" La fonction checkComm renvoit un tableau contenant les numéros des communes de mDataComm"""
+   
 def checkComm(mDataComm):
     res = []
     for i in range(len(mDataComm)):
