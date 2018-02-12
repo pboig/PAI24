@@ -265,7 +265,7 @@ def delNotFoundCommNumpy(mData,mDataN):         # Suppression des communes de la
 
 
 """La fontion splitSet sépare les valeurs de y dans les matrices trainingSet et validationSet avec une probabilité de 0.8 pour trainingSet.
-Ainsi, pour chaque champ de y, on a une chance de 0.8 de le stocker dans trainingSet. on ne stock toutefois que les indices des champs de y dans les deux nouvelles matrices créées.
+Ainsi, pour chaque ligne de y, on a une chance de 0.8 de la stocker dans trainingSet. On ne stock toutefois que les indices des lignes de y dans les deux nouvelles matrices créées.
 On renvoit ainsi les matrices trainingSet et validationSet."""
 
 # y : matrice contenant des données issues de regroupeParCommune converties au format numpy pour les opérations de modélisation et d'optimisation.
