@@ -15,7 +15,7 @@ import numpy as np
 
 
 
-"""  Convertit une donnée texte d'un fichier INSEE en un entier  """
+"""  Renvoie le texte d'un fichier INSEE converti en un entier  """
 def cint(txt):                                                             
     if (txt == 'Z') or (txt == 'ZZ') or (txt == 'ZZZ') or (txt == 'ZZZZ'):  # A étudier (fichier MobPro)
         return(0)
@@ -23,7 +23,7 @@ def cint(txt):
         return(round(float(txt)))
 
 
-"""  Charge les données d'un fichier text sous forme de lignes  """
+"""  Renvoie une liste data dont chaque élement (str) correspond à une ligne de nomFichier (.txt)  """
 def readfile(nomFichier):
     with open(nomFichier, 'r') as f:
         data = f.readlines() 
@@ -31,11 +31,11 @@ def readfile(nomFichier):
 
 
 
-"""La fonction add_ligne renvoit uniquement les champs de txtLigne qui nous intéressent. A partir du fichier txtDataBrut, en aplliquant la fonction add_ligne à toutes les lignes du fichier, on obtient une liste de listes où chacun des champs de la liste primaire correspond à une personne ayant complété l'étude avec uniquement les données qui nous intéressent.
+"""  Modifie le tableau res auquel on a ajouté les champs qui nous intéressent dans la ligne textLigne. A partir du fichier txtDataBrut, en aplliquant la fonction add_ligne à toutes les lignes du fichier, on obtient une liste de listes où chacun des champs de la liste primaire correspond à une personne ayant complété l'étude avec uniquement les données qui nous intéressent.
 On crée tout d'abord a ligne à renvoyer sous forme de liste converted_ligne.
 On commence par séparer les numéros des communes pour obtenir le numéro du département d'une part et le numéro de la commune d'aute part. On ajoute le tout dans les champs correspondant dans converted_ligne à renvoyer.
 Enfin, on complète converted_ligne par le reste des données à extraire.
-Dans la suite la variable iData sera définie dans la fonction extractUsefulData"""
+Dans la suite la variable iData sera définie dans la fonction extractUsefulData  """
 
 # indicesExtract = indices à extraire du fichier (suivant que l'on regarde les mobilités pro ou les flux de mobilité)
 # J = len(indicesExtract) : nombre d'indices à etraire
@@ -50,9 +50,9 @@ def add_ligne(txtLigne, indicesExtract, nbIdComm, J, iDep, res):
     i_r = 0                                                         # Indice lecture    (dans indicesExtract)
     i_w = 0                                                         # Indice écriture   (dans converted_ligne)
     
-    """ On commence par séparer les numéros des communes en deux.
+    """  On commence par séparer les numéros des communes en deux.
     Si iData = 1 : nbIdComm = 1 et on ne sépare que le nom de la commune de résidence en 2 avec i_r = 0 et i_w = 0
-    Si iData = 2 : nbIdComm = 2 et on sépare d'abord le nom de la commune de résidence en 2 avec i_r = 0 puis on sépare le nom de la commune de travail en 2 avec i_r = 1 et i_w = 2"""
+    Si iData = 2 : nbIdComm = 2 et on sépare d'abord le nom de la commune de résidence en 2 avec i_r = 0 puis on sépare le nom de la commune de travail en 2 avec i_r = 1 et i_w = 2  """
     while i_r < nbIdComm:
         idCommune = ligne[indicesExtract[i_r]]                      # On récupère le numéro département+commune à séparer dans la ligne de textDataBrut
         converted_ligne[i_w:i_w+2] = idCommune[:2], idCommune[2:]   # Séparation département - commune
@@ -61,7 +61,7 @@ def add_ligne(txtLigne, indicesExtract, nbIdComm, J, iDep, res):
         i_r += 1
         i_w += 2
             
-    if not(onlyDep):                                                # On renvoit une liste vide [] si la ligne correspond à un département autre que iDep
+    if not(onlyDep):                                                # On renvoit le tableau res sans modification si la ligne correspond à un département autre que iDep
         return(res)
         
     """ On ajoute ensuite dans res les champs de indicesExtract qui reste.
@@ -77,9 +77,9 @@ def add_ligne(txtLigne, indicesExtract, nbIdComm, J, iDep, res):
 
 
 
-""" la fonction extractUsefulData a pour but de ne prendre que les indices du fichier textDataBrut qui nous intéressent et les renvoit sous forme de liste.
+""" Renvoie le tableau res complété avec les champs de textDataBrut qui nous intéressent.
 Si l'on s'intéresse qu'aux mobilités pro on renvoit une liste ( IDcommune ; CSP ; lieu de travail ) où chaque champ correspond à un individu résident dans iDep.
-Si l'on s'intéresse qu'aux flux de mobilité pro on renvoit une liste ( IDcommune ; arondissement municipal de résidence ; condition d'emploi (salarié, CDI, CDD...) ) où chaque champ correspond à un individu résident dans iDep."""
+Si l'on s'intéresse qu'aux flux de mobilité pro on renvoit une liste ( IDcommune ; arondissement municipal de résidence ; condition d'emploi (salarié, CDI, CDD...) ) où chaque champ correspond à un individu résident dans iDep  """
 
 #txtDataBrut : tableau contenant toutes les lignes du fichier insee. Une ligne correspond à une personne ayant complété l'étude.
 #Paramètre iData = type de fichier lu
@@ -96,15 +96,15 @@ def extractUsefulData(txtDataBrut, iData, iDep = None):
         nbIdComm = 2
     J = len(indicesExtract)         # J : nombre d'indices à extraires du fichier txtDataBrut
     N = len(txtDataBrut)            # N : nombre total de lignes dans le fichier txtDataBrut = nombre de personnes ayant complété l'étude
-    res = []                        # On renvoit une nouvelle liste avec uniquemeent les indices de txtDataBrut qui nous intéressent
-    
+    res = []                        
     """ On parcourt tout le fichier textDataBrut et on ne récupère que les indices qui nous intéressent que l'on stock dans 'res' """
     for i in range(1,N):
         add_ligne(txtDataBrut[i], indicesExtract, nbIdComm, J, iDep, res)
-    return(res)
+    return(res) # On renvoit une nouvelle liste avec uniquemeent les indices de txtDataBrut qui nous intéressent
+   
 
 
-"""La focntion loadData renvoit un tableau contenant les champs qui nous intéressent, correspondant à iData, pour les résidents de iDep"""
+"""  Renvoie un tableau contenant les champs qui nous intéressent dans txtNomFichier, iData permet de selectionner les colonnes à extraire, et iDep d'extraire les informations uniquement pour un département  """
 
 def loadData(txtNomFichier, iData, iDep = None):
     txtDataBrut = readfile(txtNomFichier)
