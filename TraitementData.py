@@ -31,7 +31,7 @@ def readfile(nomFichier):
 
 
 
-"""  Modifie le tableau res auquel on a ajouté les champs qui nous intéressent dans la ligne textLigne. A partir du fichier txtDataBrut, en aplliquant la fonction add_ligne à toutes les lignes du fichier, on obtient une liste de listes où chacun des champs de la liste primaire correspond à une personne ayant complété l'étude avec uniquement les données qui nous intéressent.
+"""  Ajoute au tableau res les champs qui nous intéressent dans la ligne textLigne. A partir du fichier txtDataBrut, en aplliquant la fonction add_ligne à toutes les lignes du fichier, on obtient une liste de listes où chacun des champs de la liste primaire correspond à une personne ayant complété l'étude avec uniquement les données qui nous intéressent.
 On crée tout d'abord a ligne à renvoyer sous forme de liste converted_ligne.
 On commence par séparer les numéros des communes pour obtenir le numéro du département d'une part et le numéro de la commune d'aute part. On ajoute le tout dans les champs correspondant dans converted_ligne à renvoyer.
 Enfin, on complète converted_ligne par le reste des données à extraire.
@@ -77,7 +77,7 @@ def add_ligne(txtLigne, indicesExtract, nbIdComm, J, iDep, res):
 
 
 
-""" Renvoie le tableau res complété avec les champs de textDataBrut qui nous intéressent.
+""" Renvoie un tableau res contenant les champs de textDataBrut qui nous intéressent.
 Si l'on s'intéresse qu'aux mobilités pro on renvoit une liste ( IDcommune ; CSP ; lieu de travail ) où chaque champ correspond à un individu résident dans iDep.
 Si l'on s'intéresse qu'aux flux de mobilité pro on renvoit une liste ( IDcommune ; arondissement municipal de résidence ; condition d'emploi (salarié, CDI, CDD...) ) où chaque champ correspond à un individu résident dans iDep  """
 
@@ -104,7 +104,7 @@ def extractUsefulData(txtDataBrut, iData, iDep = None):
    
 
 
-"""  Renvoie un tableau contenant les champs qui nous intéressent dans txtNomFichier, iData permet de selectionner les colonnes à extraire, et iDep d'extraire les informations uniquement pour un département  """
+"""  Renvoie un tableau res contenant les champs qui nous intéressent dans txtNomFichier, iData permet de selectionner les colonnes à extraire, et iDep d'extraire les informations uniquement pour un département  """
 
 def loadData(txtNomFichier, iData, iDep = None):
     txtDataBrut = readfile(txtNomFichier)
