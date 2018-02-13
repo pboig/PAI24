@@ -143,7 +143,7 @@ def costFunction(Theta, X, y, Lambda):
     m = y.shape[0]
     J = 0
     X_aux = np.dot(X,Theta.T)
-    J = (0.5/m)*np.dot((X_aux-y).T,X_aux-y)+(Lambda/(2*m))*(np.dot(Theta,Theta.T)-Theta[0]**2)
+    J = (0.5/m)*np.dot((X_aux-y).T,X_aux-y)+(Lambda/(2*m))*(np.dot(Theta,Theta.T)-Theta[0]**2) #cf le fichier EtudeModélisation sur le drive
     return(J)
 
 def gradientCostFunction(Theta, X, y, Lambda):
